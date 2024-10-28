@@ -7,16 +7,21 @@ import { Style } from "./style";
 export type SKTextfieldProps = SKElementProps & {
   text?: string;
   disabled?: boolean; // adding property to disable the textfield
+  border?: string;
 };
 
 export class SKTextfield extends SKElement {
   disabled: boolean = false;
+  border: string;
 
-  constructor({ text = "", fill = "white", disabled = false, ...elementProps }: SKTextfieldProps = {}) {
+
+
+  constructor({ text = "", fill = "white", border = "black", disabled = false, ...elementProps }: SKTextfieldProps = {}) {
     super(elementProps);
     this.padding = Style.textPadding;
     this.text = text;
     this.fill = fill;
+    this.border = border;
     this.disabled = disabled; // Set the disabled property
   }
 
@@ -27,6 +32,8 @@ export class SKTextfield extends SKElement {
   get text() {
     return this._text;
   }
+
+
   set text(t: string) {
     this._text = t;
     this.setMinimalSize(this.width, this.height);
@@ -89,6 +96,7 @@ export class SKTextfield extends SKElement {
     } else return text;
   }
 
+
   handleKeyboardEvent(ke: SKKeyboardEvent) {
     // Prevent keyboard interactions if disabled
     if (this.disabled) return false;
@@ -96,6 +104,7 @@ export class SKTextfield extends SKElement {
     switch (ke.type) {
       case "focusout":
         this.focus = false;
+        this.border = this.border;
         return true;
         break;
       case "focusin":
@@ -177,7 +186,7 @@ export class SKTextfield extends SKElement {
     gc.fillStyle = this.fill;
     gc.fill();
     gc.lineWidth = 1;
-    gc.strokeStyle = this.focus && !this.disabled ? "mediumblue" : "black";
+    gc.strokeStyle = this.focus && !this.disabled ? "mediumblue" : this.border;
     gc.stroke();
     // clip text if it's wider than text area
     // TODO: could scroll text if it's wider than text area

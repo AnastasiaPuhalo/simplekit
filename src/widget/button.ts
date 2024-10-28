@@ -107,11 +107,13 @@ export class SKButton extends SKElement {
         this.state = "hover";
 
         //check the toggle
-
         const currentFill = this.fill;
+
         if (this.toggle) {
           // Toggle behavior: switch the checked state
           this.checked = !this.checked;
+          if (currentFill == "#ed6618")
+              this.fill = "white";
         }
 
         // return true if a listener was registered
@@ -173,7 +175,8 @@ export class SKButton extends SKElement {
       gc.lineTo(this.x + w * 0.4, this.y + h * 0.7);
       gc.lineTo(this.x + w * 0.8, this.y + h * 0.3);
       gc.lineWidth = 2;
-      gc.strokeStyle = "black";
+      gc.strokeStyle = "white";
+      this.fill = "#ed6618";
       gc.stroke();
     }
 

@@ -5,21 +5,33 @@ import { SKEvent, SKMouseEvent } from "../events";
 
 import { requestMouseFocus } from "../dispatch";
 
-export type SKButtonProps = SKElementProps & { text?: string };
+export type SKButtonProps = SKElementProps & { 
+  text?: string;
+  toggle?: boolean;  // New property to enable toggle behavior
+  checked?: boolean; // New property for checked state
+   };
 
 export class SKButton extends SKElement {
+  checked: boolean = false;  // Add a checked state for toggle
+  toggle: boolean = false;   // Add a toggle state to enable/disable toggle mode
+  
   constructor({ 
     text = "", 
     fill = "lightgrey",
+    toggle = false,     // Initialize toggle behavior
+    checked = false,    // Initialize checked state
     ...elementProps
   }: SKButtonProps = {}) {
     super(elementProps);
     this.padding = Style.textPadding;
     this.text = text;
     this.fill = fill;
+    this.toggle = toggle;    // Set initial toggle mode
+    this.checked = checked;  // Set initial checked state
     this.calculateBasis();
     this.doLayout();
   }
+
 
   state: "idle" | "hover" | "down" = "idle";
 
@@ -93,6 +105,15 @@ export class SKButton extends SKElement {
         break;
       case "mouseup":
         this.state = "hover";
+
+        //check the toggle
+
+        const currentFill = this.fill;
+        if (this.toggle) {
+          // Toggle behavior: switch the checked state
+          this.checked = !this.checked;
+        }
+
         // return true if a listener was registered
         return this.sendEvent({
           source: this,
@@ -122,6 +143,7 @@ export class SKButton extends SKElement {
 
     gc.translate(this.margin, this.margin);
 
+
     // thick highlight rect
     if (this.state == "hover" || this.state == "down") {
       gc.beginPath();
@@ -143,6 +165,18 @@ export class SKButton extends SKElement {
     gc.stroke();
     gc.clip(); // clip text if it's wider than text area
 
+
+     // Draw a checkmark if the button is toggled on (checked)
+     if (this.toggle && this.checked) {
+      gc.beginPath();
+      gc.moveTo(this.x + w * 0.2, this.y + h * 0.5);
+      gc.lineTo(this.x + w * 0.4, this.y + h * 0.7);
+      gc.lineTo(this.x + w * 0.8, this.y + h * 0.3);
+      gc.lineWidth = 2;
+      gc.strokeStyle = "black";
+      gc.stroke();
+    }
+
     // button label
     gc.font = this._font;
     gc.fillStyle = this._fontColour;
@@ -157,6 +191,7 @@ export class SKButton extends SKElement {
   }
 
   public toString(): string {
-    return `SKButton '${this.text}'`;
+    //return `SKButton '${this.text}'`;
+    return `SKButton '${this.text}' ${this.toggle ? (this.checked ? "checked" : "unchecked") : ""}`;
   }
 }

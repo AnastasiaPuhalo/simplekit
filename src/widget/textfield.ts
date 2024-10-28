@@ -6,14 +6,18 @@ import { Style } from "./style";
 
 export type SKTextfieldProps = SKElementProps & {
   text?: string;
+  disabled?: boolean; // adding property to disable the textfield
 };
 
 export class SKTextfield extends SKElement {
-  constructor({ text = "", fill = "white", ...elementProps }: SKTextfieldProps = {}) {
+  disabled: boolean = false;
+
+  constructor({ text = "", fill = "white", disabled = false, ...elementProps }: SKTextfieldProps = {}) {
     super(elementProps);
     this.padding = Style.textPadding;
     this.text = text;
     this.fill = fill;
+    this.disabled = disabled; // Set the disabled property
   }
 
   state: "idle" | "hover" = "idle";
@@ -54,7 +58,7 @@ export class SKTextfield extends SKElement {
   }
 
   protected _highlightColour = Style.highlightColour;
-  set highlightColour(hc: string){
+  set highlightColour(hc: string) {
     this._highlightColour = hc;
   }
 
@@ -86,6 +90,9 @@ export class SKTextfield extends SKElement {
   }
 
   handleKeyboardEvent(ke: SKKeyboardEvent) {
+    // Prevent keyboard interactions if disabled
+    if (this.disabled) return false;
+
     switch (ke.type) {
       case "focusout":
         this.focus = false;
@@ -111,6 +118,18 @@ export class SKTextfield extends SKElement {
   }
 
   handleMouseEvent(me: SKMouseEvent) {
+
+    //ADDED: Prevent mouse interactions if disabled
+    if (this.disabled) {
+      // Check for a double-click event
+      if (me.type === "dblclick") {
+        this.disabled = false; 
+        requestKeyboardFocus(this); 
+        return true;
+      }
+      return false; 
+    }
+
     switch (me.type) {
       case "mouseenter":
         this.state = "hover";
@@ -144,7 +163,7 @@ export class SKTextfield extends SKElement {
     gc.translate(this.margin, this.margin);
 
     // thick highlight rect
-    if (this.state == "hover") {
+    if (this.state == "hover" && !this.disabled) {
       gc.beginPath();
       gc.roundRect(0, 0, w, h, this._radius);
       gc.strokeStyle = this._highlightColour;
@@ -158,7 +177,7 @@ export class SKTextfield extends SKElement {
     gc.fillStyle = this.fill;
     gc.fill();
     gc.lineWidth = 1;
-    gc.strokeStyle = this.focus ? "mediumblue" : "black";
+    gc.strokeStyle = this.focus && !this.disabled ? "mediumblue" : "black";
     gc.stroke();
     // clip text if it's wider than text area
     // TODO: could scroll text if it's wider than text area
@@ -171,8 +190,8 @@ export class SKTextfield extends SKElement {
     gc.textAlign = "left";
     gc.fillText(this.text, this.padding, h / 2);
 
-    // simple cursor
-    if (this.focus) {
+    // simple cursor, Cursor only if focused and not disabled
+    if (this.focus && !this.disabled) {
       const cursorX = this.padding + this.textWidth + 1;
       const cursorHeight = h - Style.textPadding;
       gc.beginPath();
